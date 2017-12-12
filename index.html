@@ -1,0 +1,432 @@
+
+<html>
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
+
+       <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css?family=Raleway:200,300,400" rel="stylesheet">
+<link href="styles.css" rel="stylesheet">
+<script src="moment.min.js"></script>
+  <!-- TODO add manifest here -->
+ <script src="progressbar.js"></script>
+  	<script src="http://cdn.jsdelivr.net/alertifyjs/1.10.0/alertify.min.js"></script>
+	<link href="https://fonts.googleapis.com/css?family=Raleway:200,300,400" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
+   <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css">
+<script
+  src="https://code.jquery.com/jquery-2.2.4.min.js"
+  integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+  crossorigin="anonymous"></script>
+  <!-- Compiled and minified JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+
+</head>
+<body onload="loa()">
+
+
+	<div id="modal1" class="modal bottom-sheet">
+
+    <div class="modal-footer">
+      <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Close</a>
+    </div>
+  </div>
+
+<nav>
+    <div class="nav-wrapper  indigo darken-1">
+        <a href="" class="brand-logo center #fff-text"><h4>kony</h4></a>
+		<ul id="nav-mobile" class="right hide-on-med-and-down">
+
+        <li> <div class="input-field #757575 #e0e0e0 lighten-4">
+      <input id="search" type="search" placeholder="Search" id="fetch" onKeyPress="enterpressalert(event, this)">
+      <label class="label-icon" for="search white-text"><i class="material-icons">search</i></label>
+      <i class="material-icons">close</i>
+    </div></li>
+      </ul>
+	  </div>
+	<header class="container">
+	<div class="load"></div>
+	</header></nav>
+<div id="timeline" style="height: 300px; width:90%"></div>
+<div id="tAnalysis"></div>
+<div id="tcontainer"></div>
+<div id="tTags"> </div>
+<div id="requester"></div>
+<!-- <div class="butto"> -->
+			<!-- <a class="waves-effect waves-light btn" onClick="fetchTickets()">Fetch Comments</a></div> -->
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script>
+var userId = "product.license@kony.com/token";
+var passwd ="GneshbUqcIKpLtGFQsTTjxhrrGQvnsi9g68PIrFa"; //Use token for Kony app.
+var ticketId;  //83907               85161
+var l2Count = 0;
+var bdeCount = 0;
+var l3Count = 0;
+var others=0;
+var webex = false;
+var author;
+var commentDetails=[];
+var callIteration = 0;
+var stack=[];
+var res,loki;
+var firstFlag = true;
+
+var ticketUrl,commentUrl;
+google.charts.load('current', {
+        'packages': ['timeline']
+      });
+      google.charts.setOnLoadCallback(drawChart);
+      $(document).ready(function(){
+          // the "href" attribute of the modal trigger must specify the modal ID that wants to be triggered
+
+            });
+function loa()
+{
+  var tId=window.localStorage.getItem("ticketId");
+  if(tId)
+  {
+    if(tId===0)
+    {
+      alert("i am in tid0")
+    }
+    else {
+      ticketId=tId;
+    ticketEntry(false);
+    }
+  }
+  else {
+    alert('iam out');
+  }
+}
+function enterpressalert(e, textarea){
+var code = (e.keyCode ? e.keyCode : e.which);
+//var val=document.getElementById
+if(code == 13) { //Enter keycode
+  kcode=textarea;
+ticketEntry(true);
+}
+}
+function ticketEntry(flg)
+{
+if(flg)
+    ticketId = kcode.value.trim(' ');
+    else {
+
+    }
+    commentUrl = "https://konysolutions.zendesk.com/api/v2/tickets/"+ticketId+"/comments.json?page=1";
+   ticketUrl = "https://konysolutions.zendesk.com/api/v2/tickets/"+ticketId+".json"
+   metricUrl="https://konysolutions.zendesk.com/api/v2/tickets/"+ticketId+"/metrics.json"
+  stack=[];
+     if(ticketId.trim(' ')!=="")
+     {
+     var ticketDetails ={"id":"","createdTime":"","status":"","webex":"","firstCommentTime":"","lastCommentTime":"","l2Count":"","bdeCount":"","l3Count":"","commentDetails":[]};
+  var loader=$('<div class="lcontainer">  <ul class="loader">	  <li></li><li></li><li></li><li></li><li></li><li></li>      </ul></div> ');
+   loader.appendTo('.load');
+   if(commentDetails.length)
+   commentDetails=[];
+   fetchComments();
+     }
+  }
+
+ ticketDetails ={"id":"","createdTime":"","status":"","webex":"","firstCommentTime":"","lastCommentTime":"","l2Count":"","others":"","bdeCount":"","l3Count":"","commentDetails":[]};
+commentDetails=[];
+function fetchComments() {
+
+$('#modal1').modal();
+$.ajax({
+    url: commentUrl,
+    type: "GET",
+    dataType: 'json',
+    cors: true,
+    headers: {
+      "Authorization": "Basic " + btoa( userId + ":" + passwd)
+    }
+  }).done(function(data) {
+   loki=0;
+   //commentDetails=[];
+  res = data;
+  loki=commentDetails.length;
+  console.log(data);
+    if(firstFlag)
+        {
+            if(data.comments.length!==0)
+            {
+                firstCommentTime = data.comments[0].created_at;
+            }
+            if(commentDetails.length>0)
+            {
+              firstCommentTime=commentDetails[commentDetails.length-1].time;
+            }
+            if(data.next_page==null)
+            {
+                lastCommentTime = data.comments[(data.comments.length-1)].created_at;
+                firstFlag = false;
+            }
+            if(data.next_page!=null)
+            {
+                lastCommentTime = 0;
+                firstFlag=true;
+            }
+
+        }
+
+
+    for(i=0; i<data.comments.length; i++)
+        {
+		//loki=0;
+         var com = data.comments[i].plain_body;
+         com = com.toLowerCase();
+        if(com.includes("kony.webex.com"))
+           {
+                webex = true;
+               console.log(i +"th comment" + "-->webex detected");
+           }
+           author = data.comments[i].author_id;
+if(!(com.includes("this is an automated email from kony"))){
+            if(author === 14255408)
+                {
+
+                    bdeFlag = com.includes("#note_from_bde#"||"#note_from_dbe#");
+                    if( com.includes("#note_from_bde#")||com.includes("#note_from_dbe"))
+                        {
+
+                            commentDetails[loki++]={"team":"BDE","time":data.comments[i].created_at,"commentBody":data.comments[i].plain_body};
+                            bdeCount++;
+                        }
+                    else{
+                        commentDetails[loki++]={"team":"L2","time":data.comments[i].created_at,"commentBody":data.comments[i].plain_body};
+                        l2Count++;
+                    }
+
+                }
+
+            if(author === 14272801548)
+                {
+                    commentDetails[loki++]={"team":"BDE","time":data.comments[i].created_at,"commentBody":data.comments[i].plain_body};
+                    bdeCount++;
+                }
+
+            if(author === 235456932)
+                {
+                        commentDetails[loki++]={"team":"L3(PRODUCT)","time":data.comments[i].created_at,"commentBody":data.comments[i].plain_body};
+                        l3Count++;
+
+                }
+			if(author!==235456932&&author!==14272801548&&author!==14255408)
+			{commentDetails[loki++]={"team":"Others","time":data.comments[i].created_at,"commentBody":data.comments[i].plain_body};
+                        others++;
+			}
+
+        }
+}
+            ticketDetails.id = ticketId;
+            ticketDetails.firstCommentTime = firstCommentTime;
+            if(lastCommentTime)
+            ticketDetails.lastCommentTime = lastCommentTime;
+            ticketDetails.l2Count = l2Count;
+            ticketDetails.bdeCount = bdeCount;
+            ticketDetails.l3Count = l3Count;
+			ticketDetails.others=others;
+            ticketDetails.webex = webex;
+
+
+
+            ticketDetails.commentDetails = commentDetails;
+
+
+
+
+
+    if(data.next_page!== null)
+       {
+         console.log("there is next page");
+            commentUrl = data.next_page;
+            fetchComments();
+
+       }
+    fetchTicket();
+
+  });
+
+}
+ var lod;
+function fetchTicket(){
+
+    $.ajax({
+    url: ticketUrl,
+    type: "GET",
+    dataType: 'json',
+    cors: true,
+    headers: {
+      "Authorization": "Basic " + btoa( userId + ":" + passwd)
+    }
+  }).done(function(data) {
+  res2 = data;
+  console.dir(data);
+
+        ticketDetails.createdTime = data.ticket.created_at;
+        ticketDetails.status = data.ticket.status;
+	if(ticketDetails.commentDetails.length!=0){
+
+
+cleanD();
+}
+else
+{$('.lcontainer').remove();
+alert("L2 ,L3 ,BDE are not involved with this ticket");
+if(chart)
+chart.clearChart();
+}
+  });
+}
+var fullComm;
+function cleanD()
+{
+   $.ajax({
+    url: metricUrl,
+    type: "GET",
+    dataType: 'json',
+    cors: true,
+    headers: {
+      "Authorization": "Basic " + btoa( userId + ":" + passwd)
+    }
+  }).done(function(data) {
+  res3 = data.ticket_metric;
+  console.dir(data);
+
+  var aHour=parseInt(res3.agent_wait_time_in_minutes.calendar/60);
+   var aDay=parseInt(aHour/24);
+   aHour=aHour%24
+  var aMin=res3.agent_wait_time_in_minutes.calendar%60;
+  var rHour=parseInt(res3.requester_wait_time_in_minutes.calendar/60);
+  var rDay=parseInt(rHour/24);
+  rHour=rHour%24;
+  var rMin=res3.requester_wait_time_in_minutes.calendar%60;
+        var rTime='<h5>Agent Wait Time:</h5><p> '+aDay+' days '+aHour+' hours '+aMin+' Minutes</p><h5> Requester Wait Time: </h5><p>'+rDay+' days '+rHour+' hours '+rMin+' Minutes</p>';
+       document.getElementById('requester').innerHTML=rTime;
+
+$('.lcontainer').remove();
+ // Number from 0.0 to 1.0
+ fullComm="";
+stack=[],j=0,cnt=0;
+nam=ticketDetails.commentDetails[0].team;
+	while(j<ticketDetails.commentDetails.length)
+	{
+if(ticketDetails.commentDetails[j].team===nam){
+
+fullComm+='<div class="modal-content"><h6>Time:'+ticketDetails.commentDetails[j].time.substr(11,19)+'</h6><p> '+ticketDetails.commentDetails[j].commentBody+'<p>';
+j++;
+}
+else{
+
+a={"id":ticketDetails.commentDetails[j-1].team,"startD":ticketDetails.commentDetails[cnt].time,"endD":ticketDetails.commentDetails[j-1].time,"fullComm":fullComm};
+cnt=j-1;
+nam=ticketDetails.commentDetails[j].team;
+stack.push(a);
+fullComm="<h5>The comments of "+ticketDetails.commentDetails[j].team+" from "+ticketDetails.commentDetails[j-1].time+" to "+ticketDetails.commentDetails[j].time+"</h5><br>";
+}
+lod=stack;
+console.log(stack.length+' '+lod.length);
+
+}
+a={"id":ticketDetails.commentDetails[j-1].team,"startD":ticketDetails.commentDetails[cnt].time,"endD":ticketDetails.commentDetails[j-1].time,"fullComm":fullComm};
+stack.push(a);
+document.getElementById('tTags').innerHTML='';
+
+if(lod!=0){
+ ticket=document.getElementById('tAnalysis');
+document.getElementById('tAnalysis').innerHTML='<h4>Time line of '+ticketDetails.id+'('+ticketDetails.status+')</h4>	';
+document.getElementById('tTags').innerHTML+='<h5> Tags :</h5>';
+
+for(var k=0;k<res2.ticket.tags.length;k++)
+document.getElementById('tTags').innerHTML+='<div class="chip"><b> '+res2.ticket.tags[k]+'</b></div>';
+
+
+drawChart();
+
+}
+else
+alert("L2, L3 , BDE are not involved with this ticket");
+});
+}
+  function drawChart() {
+        var container = document.getElementById('timeline');
+         chart = new google.visualization.Timeline(container);
+         dataTable = new google.visualization.DataTable();
+		chart.clearChart();
+        dataTable.addColumn({
+          type: 'string',
+          id: 'Department'
+        });
+        dataTable.addColumn({
+          type: 'date',
+          id: 'Start'
+        });
+        dataTable.addColumn({
+          type: 'date',
+          id: 'End'
+        });
+    suma=[0,0,0];
+		for(var i=0;i<lod.length;i++)
+		{
+		//console.log(lod.length+' '+lod[i].startD);
+        dataTable.addRows([
+          [''+lod[i].id,new Date(parseInt(lod[i].startD.substr(0,4)),parseInt(lod[i].startD.substr(5,2))-1,lod[i].startD.substr(8,2),lod[i].startD.substr(11,2),lod[i].startD.substr(14,2)),new Date(lod[i].endD.substr(0,4),parseInt(lod[i].endD.substr(5,2))-1,lod[i].endD.substr(8,2),lod[i].endD.substr(11,2),lod[i].endD.substr(14,2))]
+        ])
+        var date1 = new Date(""+lod[i].startD);
+var date2 = new Date(""+lod[i].endD);
+var timeDiff = Math.abs(date2.getTime() - date1.getTime());
+var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        if(lod[i].id=="L2")
+          suma[0]=suma[0]+diffDays;
+          else if(lod[i].id=="BDE")
+            suma[1]=suma[1]+diffDays;
+            else if (lod[i].id=="L3(PRODUCT)")
+            {
+            suma[2]=suma[2]+diffDays;
+            }
+      }
+  <!-- var options = { -->
+      <!-- colors: ['#cbb69d', '#603913', '#c69c6e'], -->
+    <!-- }; -->
+		console.log(dataTable);
+		//lod=[];
+
+        chart.draw(dataTable);
+		google.visualization.events.addListener(chart, 'select', selectHandler2);
+    alert("L2 TIME: "+suma[0]+"  BDE TIME:"+suma[1]+"  L3 TIME:"+suma[2]+" Total: "+(suma[0]+suma[1]+suma[2]));
+
+}
+  function selectHandler2() {
+      var selection = chart.getSelection();
+    popUp(selection[0].row);
+  }
+  	 alertify.dialog('minimalDialog',function(){
+    return {
+        main:function(content){
+            this.setContent(content);
+        }
+    };
+});
+	function popUp(eve)
+	{
+
+<!-- alertify.defaults.transition = "zoom"; -->
+<!-- alertify.minimalDialog(""+stack[eve].fullComm); -->
+document.getElementById("modal1").innerHTML=stack[eve].fullComm;
+$('#modal1').modal('open');
+	}
+
+		//chart.clearChart();
+
+
+//obje=	chart.getSelection();
+
+
+</script>
+</body>
+
+</html>
